@@ -1,0 +1,145 @@
+package hk.com.nmg.interceptorpoc
+
+import android.content.Context
+import java.io.File
+
+/**
+ * A class that provides simple wrappers for device file management.
+ *
+ * @author Richard Arriaga
+ *
+ * @constructor
+ * Construct the [FileManager]
+ */
+class FileManager(context: Context)
+{
+    /**
+     * The root file directory where application files can be stored.
+     */
+    private val appRootDir = context.filesDir.apply { mkdirs() }
+
+    init
+    {
+        val sf = File(appRootDir, sampleFileName)
+        if (!sf.exists())
+        {
+            sf.writeText(sampleFileText)
+        }
+        val sd = File(appRootDir, sampleDir)
+        if (!sd.exists())
+        {
+            sd.mkdir()
+            val osf = File(sd, otherSampleFileName)
+            osf.writeText("Here's some text!")
+        }
+
+    }
+
+    /**
+     * Asynchronously gets the files stored in this application's private file
+     * directory.
+     *
+     * @param then
+     *   Accepts the list of [pairs][Pair] of file relative path - boolean, if
+     *   `true` indicates the file is a directory, `false` indicates it not a
+     *   directory.
+     * @param failure
+     *   Accepts a [Throwable] in the event there is a failure.
+     */
+    @Suppress("RedundantSuspendModifier")
+    suspend fun listAppDirFiles (
+        then: (List<Pair<String, Boolean>>) -> Unit,
+        failure: (Throwable) -> Unit)
+    {
+        try
+        {
+            then(appRootDir.walk().map {
+                Pair(it.toRelativeString(appRootDir), it.isDirectory)
+            }.toList())
+        }
+        catch (e: Throwable)
+        {
+            failure(e)
+        }
+    }
+
+    /**
+     * Asynchronously read the target file from disk and provide its contents.
+     *
+     * @param target
+     *   The [appRootDir] relative path to the file to retrieve.
+     * @param then
+     *   Accepts the raw [bytes][ByteArray] of the target file.
+     * @param failure
+     *   Accepts a [Throwable] in the event there is a failure.
+     */
+    @Suppress("RedundantSuspendModifier")
+    suspend fun getFileContent (
+        target: String,
+        then: (ByteArray) -> Unit,
+        failure: (Throwable) -> Unit)
+    {
+        try
+        {
+            then(File(appRootDir, target).readBytes())
+        }
+        catch (e: Throwable)
+        {
+            failure(e)
+        }
+    }
+
+    /**
+     * Save the content to a file relative to the [appRootDir].
+     *
+     * @param target
+     *   The [appRootDir] relative path to the file to retrieve.
+     * @param content
+     *   The file [contents][ByteArray] to write to disk.
+     * @param then
+     *   Called after the file is written to disk.
+     * @param failure
+     *   Accepts a [Throwable] in the event there is a failure.
+     */
+    @Suppress("RedundantSuspendModifier")
+    suspend fun saveFile (
+        target: String,
+        content: ByteArray,
+        then: () -> Unit,
+        failure: (Throwable) -> Unit)
+    {
+        try
+        {
+            File(appRootDir, target).writeBytes(content)
+            then()
+        }
+        catch (e: Throwable)
+        {
+            failure(e)
+        }
+    }
+
+    companion object
+    {
+        /**
+         * The name of the sample file we will write to disk.
+         */
+        const val sampleFileName = "sample-file.txt"
+
+        /**
+         * The name of the sample file we will write to disk.
+         */
+        const val otherSampleFileName = "other-sample-file.txt"
+
+        /**
+         * The name of a nested directory in the app's local file directory.
+         */
+        const val sampleDir = "sample-dir"
+
+        /**
+         * Just some random text to put in a the [sampleFileName].
+         */
+        const val sampleFileText =
+            "Here is some text for our text file stored on disk."
+    }
+}
