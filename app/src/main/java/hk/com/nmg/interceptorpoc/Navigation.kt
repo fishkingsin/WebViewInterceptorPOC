@@ -41,7 +41,8 @@ enum class NavRoutes
 fun WebViewAppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = NavRoutes.webView.name
+    startDestination: String = NavRoutes.webView.name,
+    url: String = "https://bit.ly/45mm1yp",
 ) {
     NavHost(
         modifier = modifier,
@@ -53,7 +54,7 @@ fun WebViewAppNavHost(
             val backHandlerEnabled =
                 remember { mutableStateOf(true) }
             WebViewContent(
-                url = "https://bit.ly/45mm1yp",
+                url = url,
                 navController = navController,
                 backHandlerEnabled = backHandlerEnabled)
         }

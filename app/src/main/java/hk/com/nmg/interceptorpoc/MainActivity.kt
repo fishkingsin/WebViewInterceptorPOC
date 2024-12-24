@@ -30,7 +30,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             WebViewInterceptorPOCTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    WebViewAppNavHost(modifier = Modifier.fillMaxSize().padding(padding))
+                    WebViewAppNavHost(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        url = "file:///android_asset/index.html"
+                    )
                 }
             }
         }
