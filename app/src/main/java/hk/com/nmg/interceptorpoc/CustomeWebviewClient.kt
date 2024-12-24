@@ -19,9 +19,9 @@ import android.webkit.WebViewClient
  *  - What to do for certain events like onPageFinished, onReceivedSslError,
  *    etc
  */
-fun webViewClient(webViewClientListener: WebViewClientListener?) = object : WebViewClient()
+fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewClient()
 {
-    val webViewClientListener = webViewClientListener
+    val webViewClientListener = webViewInterceptor
     // By overriding this with a blanket return of false we are making
     // all web navigation occur in our WebView. If we want some web
     // traffic to open in the default browser we have to add logic to
@@ -37,9 +37,9 @@ fun webViewClient(webViewClientListener: WebViewClientListener?) = object : WebV
         Log.d("WebViewClient", "shouldOverrideUrlLoading ${request.url}")
         Log.d("WebViewClient", "shouldOverrideUrlLoading ${request.isRedirect}")
 
-        if (webViewClientListener != null)
+        if (webViewInterceptor != null)
         {
-            return webViewClientListener.shouldOverrideUrlLoading(view, request)
+            return webViewInterceptor.shouldOverrideUrlLoading(view, request)
         }
         return super.shouldOverrideUrlLoading(view, request)
     }
@@ -90,9 +90,9 @@ fun webViewClient(webViewClientListener: WebViewClientListener?) = object : WebV
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         Log.d("WebViewClient", "onPageStarted $url")
-        if (webViewClientListener != null)
+        if (webViewInterceptor != null)
         {
-            val override = webViewClientListener.onPageStarted(view, url, favicon)
+            val override = webViewInterceptor.onPageStarted(view, url, favicon)
             if (override == true) return
         }
 
@@ -101,9 +101,9 @@ fun webViewClient(webViewClientListener: WebViewClientListener?) = object : WebV
 
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.d("WebViewClient", "onPageFinished $url")
-        if (webViewClientListener != null)
+        if (webViewInterceptor != null)
         {
-            val override = webViewClientListener.onPageFinished(view, url)
+            val override = webViewInterceptor.onPageFinished(view, url)
             if (override == true) return
         }
         super.onPageFinished(view, url)

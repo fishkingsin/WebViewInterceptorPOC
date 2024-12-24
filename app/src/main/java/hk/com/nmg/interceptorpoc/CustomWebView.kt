@@ -2,9 +2,7 @@ package hk.com.nmg.interceptorpoc
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.webkit.*
 import androidx.navigation.NavController
@@ -78,12 +76,12 @@ fun appWebView (
     model: WebViewModel,
     navController: NavController,
     webAppInterface: WebAppInterface? = WebAppInterface(context),
-    webViewClientListener: WebViewClientListener? = null
+    webViewInterceptor: WebViewInterceptor? = null
 ) = CustomWebView(model, navController, context).apply {
     layoutParams = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT)
-    webViewClient = webViewClient(webViewClientListener)
+    webViewClient = webViewClient(webViewInterceptor)
 
     // The WebView's WebSettings, `WebView.settings`, manages the settings
     // for a WebView. See:

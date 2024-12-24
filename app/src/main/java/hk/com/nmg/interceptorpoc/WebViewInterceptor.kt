@@ -5,13 +5,13 @@ import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 
-interface WebViewClientListener {
+interface WebViewInterceptor {
     fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean
     fun onPageStarted(view: WebView?, string: String?, bitmap: Bitmap?): Boolean
     fun onPageFinished(view: WebView?, url: String?): Boolean
 }
 
-class WebViewClientListenerAdapter : WebViewClientListener {
+class WebViewInterceptorImplementation() : WebViewInterceptor {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (request.url.toString().startsWith("https://ebx.sh")) {
             return false

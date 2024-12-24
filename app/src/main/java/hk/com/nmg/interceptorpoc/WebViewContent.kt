@@ -38,7 +38,7 @@ fun WebViewContent (
     url: String,
     backHandlerEnabled: MutableState<Boolean>,
     navController: NavController,
-    webViewClientListener: WebViewClientListener = WebViewClientListenerAdapter(),
+    webViewInterceptor: WebViewInterceptor = WebViewInterceptorImplementation(),
 )
 {
     var loading by remember { mutableStateOf(false) }
@@ -121,7 +121,7 @@ fun WebViewContent (
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
-            appWebView(context, url, savedBundle, model, navController, webViewClientListener = webViewClientListener).apply {
+            appWebView(context, url, savedBundle, model, navController, webViewInterceptor = webViewInterceptor).apply {
                 webView = this
             }
         },
