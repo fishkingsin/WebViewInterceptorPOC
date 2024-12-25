@@ -7,6 +7,7 @@ import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
@@ -19,9 +20,25 @@ import android.webkit.WebViewClient
  *  - What to do for certain events like onPageFinished, onReceivedSslError,
  *    etc
  */
-fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewClient()
+fun webViewClient(webViewInterceptorManager: WebViewInterceptorManager = WebViewInterceptorManager()) = object : WebViewClient()
 {
-    val webViewClientListener = webViewInterceptor
+
+    override fun shouldInterceptRequest(
+        view: WebView?,
+        request: WebResourceRequest?
+    ): WebResourceResponse? {
+        val webViewInterceptor = webViewInterceptorManager?.interceptor(request?.url.toString())
+        if ( webViewInterceptor != null)
+        {
+            val response = webViewInterceptor.shouldInterceptRequest(view, request)
+            return when(response) {
+                null -> super.shouldInterceptRequest(view, request)
+                else -> webViewInterceptor.shouldInterceptRequest(view, request)
+            }
+        }
+        return super.shouldInterceptRequest(view, request)
+    }
+
     // By overriding this with a blanket return of false we are making
     // all web navigation occur in our WebView. If we want some web
     // traffic to open in the default browser we have to add logic to
@@ -36,7 +53,7 @@ fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewCli
     {
         Log.d("WebViewClient", "shouldOverrideUrlLoading ${request.url}")
         Log.d("WebViewClient", "shouldOverrideUrlLoading ${request.isRedirect}")
-
+        val webViewInterceptor = webViewInterceptorManager?.interceptor(request.url.toString())
         if (webViewInterceptor != null)
         {
             return webViewInterceptor.shouldOverrideUrlLoading(view, request)
@@ -89,6 +106,7 @@ fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewCli
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        val webViewInterceptor = url?.let { webViewInterceptorManager?.interceptor(it) }
         Log.d("WebViewClient", "onPageStarted $url")
         if (webViewInterceptor != null)
         {
@@ -101,6 +119,7 @@ fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewCli
 
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.d("WebViewClient", "onPageFinished $url")
+        val webViewInterceptor = url?.let { webViewInterceptorManager?.interceptor(it) }
         if (webViewInterceptor != null)
         {
             val override = webViewInterceptor.onPageFinished(view, url)
@@ -108,6 +127,7 @@ fun webViewClient(webViewInterceptor: WebViewInterceptor?) = object : WebViewCli
         }
         super.onPageFinished(view, url)
     }
+
 }
 
 /**

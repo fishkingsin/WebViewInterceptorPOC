@@ -76,12 +76,11 @@ fun appWebView (
     model: WebViewModel,
     navController: NavController,
     webAppInterface: WebAppInterface? = WebAppInterface(context),
-    webViewInterceptor: WebViewInterceptor? = null
 ) = CustomWebView(model, navController, context).apply {
     layoutParams = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT)
-    webViewClient = webViewClient(webViewInterceptor)
+    webViewClient = webViewClient()
 
     // The WebView's WebSettings, `WebView.settings`, manages the settings
     // for a WebView. See:

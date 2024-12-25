@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
@@ -31,17 +31,15 @@ import androidx.navigation.NavController
  *   The [NavController] used for screen navigation.
  */
 @Composable
-fun WebViewContent (
+fun WebViewContent(
     model: WebViewModel = viewModel<WebViewModel>(
         factory = WebViewModelFactory(null)
     ),
     url: String,
     backHandlerEnabled: MutableState<Boolean>,
     navController: NavController,
-    webViewInterceptor: WebViewInterceptor = WebViewInterceptorImplementation(),
-)
-{
-    var loading by remember { mutableStateOf(false) }
+    webViewInterceptor: WebViewInterceptor? = DomainName.from(url)?.webViewInterceptor,
+) {
     // HACK
     // The following is a hack to preserve the WebView state upon a
     // configuration change. At the time of building this app there is no
@@ -121,7 +119,12 @@ fun WebViewContent (
     AndroidView(
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
-            appWebView(context, url, savedBundle, model, navController, webViewInterceptor = webViewInterceptor).apply {
+            appWebView(
+                context,
+                url,
+                savedBundle, model,
+                navController,
+            ).apply {
                 webView = this
             }
         },

@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     // Jetpack Compose Navigation
     implementation(libs.androidx.navigation.compose)
     // This JSON library is very straight forward, like a string builder. No
