@@ -29,15 +29,18 @@ class EbxshWebViewInterceptor(
         request: WebResourceRequest?
     ): WebResourceResponse? {
         Log.d(TAG, "shouldInterceptRequest#request=${request?.url}")
-        request?.url?.let { itUrl ->
+        return generateResponse(request)
+    }
+
+    private fun generateResponse(request: WebResourceRequest?): WebResourceResponse? {
+        return request?.url?.let { itUrl ->
             val connection =
                 URL(itUrl.toString()).openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("User-Agent", "Mozilla/5.0")
             connection.instanceFollowRedirects = true
-            return parseResponse(connection)
+            return@let parseResponse(connection)
         }
-        return null
     }
 
     private fun parseResponse(connection: HttpURLConnection): WebResourceResponse? {
@@ -52,20 +55,20 @@ class EbxshWebViewInterceptor(
                     TAG,
                     "shouldInterceptRequest#need redirect${connection.url}"
                 )
-            } else {
-                Log.d(
-                    TAG,
-                    "shouldInterceptRequest#no redirect${connection.url}"
-                )
+                return null
             }
+            Log.d(
+                TAG,
+                "shouldInterceptRequest#no redirect${connection.url}"
+            )
             Log.d(TAG, "shouldInterceptRequest#no#${connection.url}")
-            val response =
-                getResponse(connection)
-            Log.d(TAG, "shouldInterceptRequest#response=${response.toString()}")
+            val manipulatedResponse =
+                manipulateResponse(connection)
+            Log.d(TAG, "shouldInterceptRequest#response=${manipulatedResponse.toString()}")
             return WebResourceResponse(
                 "text/html",
                 "UTF-8",
-                ByteArrayInputStream(response.toByteArray())
+                ByteArrayInputStream(manipulatedResponse.toByteArray())
             )
         } catch (e: Exception) {
             Log.e(TAG, "shouldInterceptRequest#exception=${e.message}")
@@ -73,7 +76,7 @@ class EbxshWebViewInterceptor(
         return null
     }
 
-    private fun getResponse(connection: HttpURLConnection): String =
+    private fun manipulateResponse(connection: HttpURLConnection): String =
         if (connection.responseCode == HttpURLConnection.HTTP_OK) {
             BufferedReader(InputStreamReader(connection.inputStream)).use {
                 it.readText()
